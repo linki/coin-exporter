@@ -33,6 +33,13 @@ var (
 			Help:      "Total number of Blocks",
 		},
 	)
+	Subsidy = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: "earthcoin",
+			Name:      "subsidy",
+			Help:      "Current subsidy",
+		},
+	)
 	ConnectionCount = prometheus.NewGauge(
 		prometheus.GaugeOpts{
 			Namespace: "earthcoin",
@@ -71,6 +78,7 @@ func init() {
 
 	prometheus.MustRegister(
 		BlockCount,
+		Subsidy,
 		ConnectionCount,
 		Difficulty,
 		HashesPerSec,
@@ -115,6 +123,22 @@ func retrieveMetrics(client *btcrpcclient.Client) {
 
 		// Export current block count as prometheus metric.
 		BlockCount.Set(float64(blockCount))
+
+		bestBlockHash, err := client.GetBlockHash(blockCount)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		bestBlock, err := client.GetBlock(bestBlockHash)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		subsidy := bestBlock.Transactions[0].TxOut[0].Value / 100000000
+		log.Printf("Subsidy: %d", subsidy)
+
+		// TODO
+		Subsidy.Set(float64(subsidy))
 
 		// Get the current connection count.
 		connectionCount, err := client.GetConnectionCount()
