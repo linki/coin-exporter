@@ -1,0 +1,10 @@
+package: github.com/earthcoinproject/coin-exporter
+import:
+- package: github.com/alecthomas/kingpin
+  version: ~2.2.4
+- package: github.com/btcsuite/btcrpcclient
+- package: github.com/prometheus/client_golang
+  version: ~0.8.0
+  subpackages:
+  - prometheus
+  - prometheus/promhttp
